@@ -1,0 +1,198 @@
+---
+#title: '"Singnal Process which produces Higgs bosons and back ground process which does not'""
+##author: "Anand-Sujit-Sunil"
+##date: "November 28, 2018"
+##output: html_document
+---
+**NOTE** clearing environment
+
+```{r}
+
+rm(list = ls(all=TRUE))
+
+```
+
+
+```{r}
+
+getwd()
+
+```
+
+```{r}
+
+setwd("C:/Users/DELL/Desktop/cute 2")
+
+```
+
+
+# Reading the data file
+```{r}
+cutedata<-read.csv("train_data.csv",header = TRUE)
+
+```
+
+#Take a look at the data using the "head()" and "tail()" functions
+
+```{r}
+head(cutedata)
+tail(cutedata)
+
+```
+#Understand the distribution of various variables in the datset using the "summary()" function
+
+```{r}
+summary(cutedata)
+```
+
+# Checking for missing values
+
+```{r}
+sapply (cutedata,function (x) sum(is.na(x)))
+
+```
+
+
+#Missing values vs observed
+```{r}
+library(Amelia)
+missmap(cutedata, main = "Missing values vs observed")
+
+```
+
+
+# Summarize the data (lookwise better)
+```{r}
+summary(cutedata)
+library(mlr)
+summarizeColumns(cutedata)
+
+```
+
+# Overview of data
+```{r}
+str(cutedata)
+names(cutedata)
+```
+
+
+# Converting into factor
+```{r}
+cutedata$class<-as.factor(cutedata$class)
+```
+
+# Checking the data to know total no of 1's and 0's for checking imbalance
+
+```{r}
+table(cutedata$class)
+prop.table(table(cutedata$class))*100
+
+```
+
+# Delete Id from the data (id is identified as by common sense, like phone no)
+```{r}
+
+cutedata<-cutedata[-30]
+names(cutedata)
+
+```
+
+
+# Data exploration to see in the bar graph
+# aes = asthetics
+
+```{r}
+library(ggplot2)
+ggplot(cutedata,aes(x=factor(class)))+
+  geom_bar(fill='green')
+
+```
+
+
+
+#dplyr for filter, sorting
+```{r}
+
+library (dplyr)
+
+```
+
+# creating a vector for all the independent variable 
+```{r}
+inputvar<-c("lepton_phi",
+            "missing_energy_magnitude",
+            "missing_energy_phi",
+            "jet1pt",
+            "jet1eta",
+            "jet1phi",
+            "jet1b.tag",
+            "jet2pt",
+            "jet2eta",
+            "jet2phi",
+            "jet2b.tag",
+            "jet3pt",
+            "jet3eta",
+            "jet3phi",
+            "jet3b.tag",
+            "jet4pt",
+            "jet4eta",
+            "jet4phi",
+            "jet4b.tag",
+            "m_jj",
+            "m_jjj",
+            "m_lv",
+            "m_jlv",
+            "m_bb",
+            "m_wbb",
+            "m_wwbb"
+)
+
+m <- cor(cutedata[,inputvar])
+library(corrplot)
+corrplot(m,method = "number") # numerics value bold is high corelatted
+corrplot(m,method = "circle") # Big circules is high corelatted
+
+```
+
+
+
+# Build a model
+
+## Basic Logistic Regression Model
+
+* Use the glm() function to build a basic model
+
+* Build a model using all the variables, excluding the response variable, in the dataset
+
+* Get the summary of the model and understand the output
+
+
+```{r}
+Model1<-glm(class~.,family=binomial(link=logit),data = cutedata)
+library(car)
+vif(Model1)
+summary(Model1)
+
+# m_wbb has highter VIF so i have removed that variabe from the model
+
+```
+
+
+```{r}
+Model2<-glm(class~lepton_phi+missing_energy_magnitude+missing_energy_phi+jet1pt+jet1eta+jet1phi+jet1b.tag+jet2pt+jet2eta+jet2phi+jet2b.tag+jet3pt+jet3eta+jet3phi+jet3b.tag+jet4pt+jet4eta+jet4phi+jet4b.tag+m_jj+m_jjj+m_lv+m_jlv+m_bb+m_wwbb,family=binomial(link = logit),data=cutedata)
+vif(Model2)
+summary(Model2)
+
+```
+
+# Removing non significant vairables
+
+```{r}
+Model3<-glm(class~missing_energy_magnitude+jet1pt+jet1b.tag+jet2pt+jet2b.tag+jet3pt+jet3b.tag+jet4pt+jet4b.tag+m_jj+m_jjj+m_lv+m_jlv+m_bb+m_wwbb,family=binomial(link = logit),data=cutedata)
+summary(Model3)
+
+# all the variables are contributing sifnificantly to the model as they sig is < .05
+
+
+```
+

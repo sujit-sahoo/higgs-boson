@@ -1,0 +1,285 @@
+---
+title: "7302_Cute_Team5"
+author: "Sujit"
+date: "27 November 2018"
+output: html_document
+---
+
+```{r}
+rm(list = ls(all=TRUE))
+```
+
+```{r}
+higgs_boson_data = read.table("CSE7302c_train.csv",header = T, sep = ",")
+dim(higgs_boson_data)
+```
+```{r}
+str(higgs_boson_data)
+```
+
+```{r}
+summary(higgs_boson_data)
+```
+
+```{r}
+head(higgs_boson_data)
+tail(higgs_boson_data)
+```
+
+```{r fig.height= 1, fig.width = 2}
+#install.packages("ggplot2")
+par(mfrow = c(6,6))
+ggplot2::qplot(higgs_boson_data$lepton_pT, geom = 'histogram', binwidth = .2)
+ggplot2::qplot(higgs_boson_data$lepton_eta, geom = 'histogram', binwidth = .2)
+ggplot2::qplot(higgs_boson_data$lepton_phi, geom = 'histogram', binwidth = .2)
+ggplot2::qplot(higgs_boson_data$missing_energy_magnitude, geom = 'histogram', binwidth = .2)
+ggplot2::qplot(higgs_boson_data$missing_energy_phi, geom = 'histogram', binwidth = .2)
+ggplot2::qplot(higgs_boson_data$jet1pt, geom = 'histogram', binwidth = .2)
+ggplot2::qplot(higgs_boson_data$jet1eta, geom = 'histogram', binwidth = .2)
+ggplot2::qplot(higgs_boson_data$jet1phi, geom = 'histogram', binwidth = .2)
+ggplot2::qplot(higgs_boson_data$jet1b.tag, geom = 'histogram', binwidth = .2)
+ggplot2::qplot(higgs_boson_data$jet2pt, geom = 'histogram', binwidth = .2)
+ggplot2::qplot(higgs_boson_data$jet2eta, geom = 'histogram', binwidth = .2)
+ggplot2::qplot(higgs_boson_data$jet2phi, geom = 'histogram', binwidth = .2)
+ggplot2::qplot(higgs_boson_data$jet2b.tag, geom = 'histogram', binwidth = .2)
+ggplot2::qplot(higgs_boson_data$jet3pt, geom = 'histogram', binwidth = .2)
+ggplot2::qplot(higgs_boson_data$jet3eta, geom = 'histogram', binwidth = .2)
+ggplot2::qplot(higgs_boson_data$jet3phi, geom = 'histogram', binwidth = .2)
+ggplot2::qplot(higgs_boson_data$jet3b.tag, geom = 'histogram', binwidth = .2)
+ggplot2::qplot(higgs_boson_data$jet4pt, geom = 'histogram', binwidth = .2)
+ggplot2::qplot(higgs_boson_data$jet4eta, geom = 'histogram', binwidth = .2)
+ggplot2::qplot(higgs_boson_data$jet4phi, geom = 'histogram', binwidth = .2)
+ggplot2::qplot(higgs_boson_data$jet4b.tag, geom = 'histogram', binwidth = .2)
+ggplot2::qplot(higgs_boson_data$m_jj, geom = 'histogram', binwidth = .2)
+ggplot2::qplot(higgs_boson_data$m_jjj, geom = 'histogram', binwidth = .2)
+ggplot2::qplot(higgs_boson_data$m_lv, geom = 'histogram', binwidth = .2)
+ggplot2::qplot(higgs_boson_data$m_jlv, geom = 'histogram', binwidth = .2)
+ggplot2::qplot(higgs_boson_data$m_bb, geom = 'histogram', binwidth = .2)
+ggplot2::qplot(higgs_boson_data$m_wbb, geom = 'histogram', binwidth = .2)
+ggplot2::qplot(higgs_boson_data$m_wwbb, geom = 'histogram', binwidth = .2)
+par(mfrow = c(1,1))
+```
+
+
+```{r fig.height= 8, fig.width = 9}
+library(corrplot)
+
+corrplot(cor(higgs_boson_data, use = "complete.obs"), method = "number")
+```
+
+
+```{r}
+sum(is.na(higgs_boson_data))
+```
+
+```{r}
+higgs_boson_data$id <- NULL
+
+cat_cols = c("jet1b.tag","jet2b.tag","jet3b.tag","jet4b.tag")
+num_cols = setdiff(colnames(higgs_boson_data),cat_cols)
+cat_cols
+num_cols
+```
+
+```{r}
+higgs_boson_data[,cat_cols] = data.frame(apply(higgs_boson_data[,cat_cols],2,as.factor))
+str(higgs_boson_data)
+```
+
+
+```{r}
+dummy_obj <- dummyVars( ~ . , higgs_boson_data)
+
+higgs_boson_dummy_data <- as.data.frame(predict(dummy_obj, higgs_boson_data))
+
+head(higgs_boson_dummy_data)
+
+higgs_boson_dummy_data$class = as.factor(as.character(higgs_boson_dummy_data$class))
+str(higgs_boson_dummy_data)
+```
+
+```{r}
+names(higgs_boson_dummy_data)[names(higgs_boson_dummy_data) == "jet1b.tag.0"] <- "jet1btag0"
+names(higgs_boson_dummy_data)[names(higgs_boson_dummy_data) == "jet1b.tag.1.086538"] <- "jet1btag1086538"
+names(higgs_boson_dummy_data)[names(higgs_boson_dummy_data) == "jet1b.tag.1.086538076"] <- "jet1btag1086538076"
+names(higgs_boson_dummy_data)[names(higgs_boson_dummy_data) == "jet1b.tag.2.173076"] <- "jet1btag2173076"
+names(higgs_boson_dummy_data)[names(higgs_boson_dummy_data) == "jet1b.tag.2.173076153"] <- "jet1btag2173076153"
+higgs_boson_dummy_data$jet1btag2173076153 <- NULL
+
+names(higgs_boson_dummy_data)[names(higgs_boson_dummy_data) == "jet2b.tag.0"] <- "jet2btag0"
+names(higgs_boson_dummy_data)[names(higgs_boson_dummy_data) == "jet2b.tag.1.107436"] <- "jet2btag1107436"
+names(higgs_boson_dummy_data)[names(higgs_boson_dummy_data) == "jet2b.tag.1.107436061"] <- "jet2btag1107436061"
+names(higgs_boson_dummy_data)[names(higgs_boson_dummy_data) == "jet2b.tag.2.214872"] <- "jet2btag2214872"
+names(higgs_boson_dummy_data)[names(higgs_boson_dummy_data) == "jet2b.tag.2.214872122"] <- "jet2btag2214872122"
+higgs_boson_dummy_data$jet2btag2214872122 <- NULL
+
+names(higgs_boson_dummy_data)[names(higgs_boson_dummy_data) == "jet3b.tag.0"] <- "jet3btag0"
+names(higgs_boson_dummy_data)[names(higgs_boson_dummy_data) == "jet3b.tag.1.274112"] <- "jet3btag1274112"
+names(higgs_boson_dummy_data)[names(higgs_boson_dummy_data) == "jet3b.tag.1.274112225"] <- "jet3btag1274112225"
+names(higgs_boson_dummy_data)[names(higgs_boson_dummy_data) == "jet3b.tag.2.548224"] <- "jet3btag2548224"
+names(higgs_boson_dummy_data)[names(higgs_boson_dummy_data) == "jet3b.tag.2.548224449"] <- "jet3btag2548224449"
+higgs_boson_dummy_data$jet3btag2548224449 <- NULL
+
+names(higgs_boson_dummy_data)[names(higgs_boson_dummy_data) == "jet4b.tag.0"] <- "jet4btag0"
+names(higgs_boson_dummy_data)[names(higgs_boson_dummy_data) == "jet4b.tag.1.550980687"] <- "jet4btag1550980687"
+names(higgs_boson_dummy_data)[names(higgs_boson_dummy_data) == "jet4b.tag.1.550981"] <- "jet4btag1550981"
+names(higgs_boson_dummy_data)[names(higgs_boson_dummy_data) == "jet4b.tag.3.101961"] <- "jet4btag3101961"
+names(higgs_boson_dummy_data)[names(higgs_boson_dummy_data) == "jet4b.tag.3.101961374"] <- "jet4btag3101961374"
+higgs_boson_dummy_data$jet4btag3101961374 <- NULL
+
+names(higgs_boson_dummy_data)
+```
+
+
+```{r}
+library(caret)
+
+set.seed(555)
+
+train_rows <- createDataPartition(higgs_boson_dummy_data$class, p=0.7, list = F)
+
+train_data <- higgs_boson_dummy_data[train_rows,]
+
+validate_data <- higgs_boson_dummy_data[-train_rows,]
+```
+
+
+```{r}
+library(MASS)
+log_reg <- glm(class~., data = train_data, family = binomial)
+summary(log_reg)
+```
+
+```{r}
+car::vif(log_reg)
+```
+
+```{r fig.height= 8, fig.width = 9}
+library(corrplot)
+corrplot(cor(train_data[num_cols], use = "pairwise.complete.obs"))
+```
+
+
+```{r}
+model_aic <- stepAIC(log_reg, direction = "both")
+
+summary(model_aic)
+```
+
+```{r}
+log_reg_higg_boson = glm(formula = class ~ lepton_pT + missing_energy_magnitude + 
+    jet1pt + jet1eta + jet1btag1086538076 + jet2pt + jet2btag0 + 
+    jet2btag1107436 + jet3pt + jet3btag0 + jet4pt + jet4btag0 + 
+    jet4btag1550981 + m_jj + m_jjj + m_lv + m_jlv + m_bb + m_wbb + 
+    m_wwbb, family = binomial, data = train_data)
+summary(log_reg_higg_boson)
+
+```
+
+```{r}
+library(car)
+car::vif(log_reg_higg_boson)
+```
+
+```{r}
+higg_boson_log_reg = glm(formula = class ~ lepton_pT + missing_energy_magnitude + 
+    jet1pt + jet1eta + jet1btag1086538076 + jet2pt + jet2btag0 + 
+    jet2btag1107436 + jet3pt + jet3btag0 + jet4pt + jet4btag0 + 
+    jet4btag1550981 + m_jj + m_jjj + m_lv + m_jlv + m_bb, family = binomial, data = train_data)
+summary(higg_boson_log_reg)
+```
+
+```{r}
+library(car)
+car::vif(higg_boson_log_reg)
+```
+
+
+
+```{r}
+prob_train <- predict(log_reg_higg_boson, type = "response")
+prob_train[1:6]
+pred_train <- ifelse(prob_train > 0.6, 1, 0)
+```
+
+```{r}
+library(caret)
+
+conf_matrix <- table(train_data$class,pred_train)
+
+print(conf_matrix)
+confusionMatrix(as.factor(pred_train), train_data$class, positive = "1")
+```
+
+
+```{r}
+library(ROCR)
+
+pred <- prediction(prob_train,train_data$class)
+```
+
+
+```{r}
+perf <- performance(pred, measure = "tpr", x.measure = "fpr")
+```
+
+```{r}
+plot(perf, col=rainbow(10),colorize = T,print.cutoffs.at=seq(0,1,0.05))
+```
+
+```{r}
+perf_auc <- performance(pred, measure = "auc")
+auc <- perf_auc@y.values[[1]]
+print(auc)
+```
+
+```{r}
+prob_validate <- predict(higg_boson_log_reg, validate_data, type = "response")
+pred_validate <- ifelse(prob_validate > 0.6, 1, 0)
+```
+
+```{r}
+library(caret)
+
+confusionMatrix(as.factor(pred_validate), validate_data$class, positive = "1")
+
+```
+
+```{r}
+ctrl <- trainControl(method = "repeatedcv", number = 10, savePredictions = TRUE)
+
+mod_fit <- train(class ~ lepton_pT + missing_energy_magnitude + 
+    jet1pt + jet1eta + jet1btag1086538076 + jet2pt + jet2btag0 + 
+    jet2btag1107436 + jet3pt + jet3btag0 + jet4pt + jet4btag0 + 
+    jet4btag1550981 + m_jj + m_jjj + m_lv + m_jlv + m_bb,  
+    data=train_data, method="glm", family="binomial", trControl = ctrl, tuneLength = 5)
+
+#library(ROCR)
+#pred <- prediction(mod_fit ,train_data)
+#perf <- performance(pred, measure = "tpr", x.measure = "fpr")
+#perf_auc <- performance(pred, measure = "auc")
+#auc <- perf_auc@y.values[[1]]
+#print(auc)
+
+pred = predict(mod_fit, newdata=validate_data)
+confusionMatrix(data=pred, validate_data$class)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
